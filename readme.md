@@ -9,6 +9,8 @@ Currently we have IVAO support only but working on a VATSIM support too.
 ## 📸 Screenshots
 ### User Interface
 ![App Interface](img/v3.png)
+#### ATIS warnings
+![ATIS Warnings](img/v3-warnings.png)
 ### Server Console
 ![Server Console](img/v3-server.png)
 
