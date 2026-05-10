@@ -157,11 +157,7 @@ async function load_data(data: MetarData, taf_data: TafData | undefined, atis_da
 
         out_qnh.innerHTML = data.altim;
         out_wdir.innerHTML = data.wdir.toString();
-        if (data.wspd <= 2) {
-            out_wspd.innerHTML = "L";
-        } else {
-            out_wspd.innerHTML = data.wspd.toString();
-        }
+        out_wspd.innerHTML = data.wspd.toString();
         out_conditions.innerHTML = data.cover;
 
         // Wind background color
