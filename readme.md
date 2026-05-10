@@ -6,9 +6,9 @@ A Node.js and TypeScript-based tool for virtual air traffic controllers. This to
 
 ## 📸 Screenshots
 ### User Interface
-![App Interface](v3.png)
+![App Interface](img/v3.png)
 ### Server Console
-![Server Console](v3-server.png)
+![Server Console](img/v3-server.png)
 
 ---
 
