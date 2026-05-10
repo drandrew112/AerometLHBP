@@ -53,7 +53,7 @@ node index.js
 ## 🛠️ Tech Stack
 *   **Backend:** [Node.js](https://nodejs.org)
 *   **Languages:** TypeScript & JavaScript & HTML
-*   **APIs used:** [AviationWeather.gov](AviationWeather.gov) & IVAO Aurora 3rd party support
+*   **APIs used:** [AviationWeather.gov](AviationWeather.gov) & [IVAO Aurora 3rd party support](https://wiki.ivao.aero/en/home/devops/manuals/Aurora-3rd-parties-documentation)
 
 ---
 
