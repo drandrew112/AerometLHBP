@@ -1,6 +1,8 @@
-# AeroMet LHBP
+# vAMET for LHBP
 
 A Node.js and TypeScript-based tool for virtual air traffic controllers. This tool provides a highly realistic meteorological panel, replicating the layout and logic of the systems used in real-world Budapest (LHBP) operations.
+
+Currently we have IVAO support only but working on a VATSIM support too.
 
 ---
 

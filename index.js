@@ -26,7 +26,7 @@ function updateStatusLine() {
     
     // Elmentjük a kurzort -> 1;1-re ugrunk -> Kiírjuk a csíkot -> Visszaállítjuk a kurzort
     // A \x1b[K törli a sort, hogy ne maradjon ott régi szöveg
-    const status = `\x1b[s\x1b[1;1H\x1b[48;5;250m\x1b[38;5;16m [\x1b[34m|\x1b[30m] Aeromet LHBP :: \x1b[31m${clientCount}\x1b[30m clients :: \x1b[31m${serverIP}:${HTTP_PORT} \x1b[K\x1b[0m\x1b[u`;
+    const status = `\x1b[s\x1b[1;1H\x1b[48;5;250m\x1b[38;5;16m [\x1b[34m|\x1b[30m] vAMET LHBP :: \x1b[31m${clientCount}\x1b[30m clients :: \x1b[31m${serverIP}:${HTTP_PORT} \x1b[K\x1b[0m\x1b[u`;
     
     process.stdout.write(status);
 }
@@ -156,10 +156,15 @@ async function updateWeatherData(force = false) {
     }
 }
 
-async function updateATISData() {
+async function updateATISData() { // Made for IVAO
     client.write('#ATIS\n');
     cacheData.atis = lastAuroraData;
 }
+
+// Future plan:
+// VATSIM API for VATSIM ATIS
+// docs        https://vatsim.dev/api/data-api/list-atis-stations/
+// api link    https://data.vatsim.net/v3/afv-atis-data.json
 
 function sendDataToClients() {
     weatherData.metar = cacheData.metar;
@@ -199,7 +204,7 @@ server.listen(HTTP_PORT, '0.0.0.0', () => {
 
     const ip = getLocalIpAddress();
     console.log("");
-    consoleLog(`========== AEROMET LHBP ==========`);
+    consoleLog(`========== vAMET LHBP ==========`);
     consoleLog(`= Server started`);
     consoleLog(`= IP: ${ip}`);
     consoleLog(`= Port: ${HTTP_PORT}`);
