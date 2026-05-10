@@ -15,8 +15,7 @@ const io = new Server(server, { cors: { origin: "*" } });
 const AURORA_IP = '127.0.0.1';
 const AURORA_PORT = 1130;
 const HTTP_PORT = 80;
-const logsDir = path.join(__dirname, 'Logs');
-const logFilePath = path.join(__dirname, 'server.log');
+const logFilePath = path.join(process.cwd(), 'server.log');
 
 let serverIP = getLocalIpAddress();
 
@@ -31,35 +30,6 @@ function updateStatusLine() {
     process.stdout.write(status);
 }
 setInterval(updateStatusLine, 1000);
-
-function handleShutdown(signal) {
-    console.log("\n");
-    consoleLog(`Server shutting down (${signal})`);
-
-    try {
-        // Dátum formázása a fájlnévhez (pl. 2024-05-20_14-30-05)
-        const now = new Date();
-        const timestamp = now.toISOString().replace(/T/, '_').replace(/:/g, '-').split('.')[0];
-        const finalLogName = `log_${timestamp}.log`;
-        const finalLogPath = path.join(logsDir, finalLogName);
-
-        // Aktuális log átmásolása a Logs mappába
-        if (fs.existsSync(logFilePath)) {
-            fs.copyFileSync(logFilePath, finalLogPath);
-            // console.log-ot használunk consoleLog helyett, hogy ne írjunk bele az épp mentett fájlba
-            process.stdout.write(`\x1b[32m[SYSTEM] Session log saved to: Logs/${finalLogName}\x1b[0m\n`);
-        }
-    } catch (err) {
-        process.stderr.write(`Error saving final log: ${err.message}\n`);
-    }
-
-    client.destroy();
-    process.exit(0);
-}
-
-if (!fs.existsSync(logsDir)) {
-    fs.mkdirSync(logsDir);
-}
 
 function writeToLog(message) {
     const timestamp = new Date().toISOString().replace(/T/, ' ').replace(/\..+/, '');

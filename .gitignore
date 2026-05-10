@@ -1,7 +1,6 @@
 /node_modules/
 /dist/
 /Server.bat
-/Aeromet-v3.rar
 /package-lock.json
 /server.log
-
+/Releases/

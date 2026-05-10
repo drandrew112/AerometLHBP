@@ -6,8 +6,10 @@
   "author": "DookthorAndriss",
   "type": "commonjs",
   "main": "index.js",
+  "bin": "index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "run": "node index.js",
+    "build": "pkg . --targets node18-win-x64 --output vAMET.exe"
   },
   "dependencies": {
     "axios": "^1.16.0",
@@ -15,5 +17,8 @@
     "express": "^5.2.1",
     "socket.io": "^4.8.3",
     "typescript": "^6.0.3"
-  }
+  },
+  "devDependencies": {
+    "pkg": "^5.8.1"
+  } 
 }
