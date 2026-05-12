@@ -11,4 +11,5 @@
 
 !lib/
 !networks/
-!web/
+!web/index.html
+!web/src/
