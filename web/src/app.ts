@@ -4,7 +4,28 @@ const socket = io({
     upgrade: false
 });
 
-import { MetarData, TafData, AuroraAtisData, parseAuroraAtis } from "./defs.js";
+// Eseménykezelők
+socket.on('connect', () => {
+    console.log("Connected to server");
+    const out_atis = document.getElementById("atis");
+    if (out_atis) {
+        out_atis.style.display = "block";
+        out_atis.innerHTML = "<a class='text-atis-green'>Connected to server</a>";
+    }
+});
+
+socket.on('disconnect', () => {
+    console.log("Disconnected from server");
+    const out_atis = document.getElementById("atis");
+    if (out_atis) {
+        out_atis.style.display = "block";
+        out_atis.innerHTML = "<a class='text-atis-red'>Connection lost with the server! Current weather informations can be outdated!</a>";
+    }
+});
+
+
+
+import { MetarData, TafData, AuroraAtisData } from "./defs.js";
 
 let cache_metar: MetarData;
 
@@ -129,8 +150,8 @@ function updateAtisUI(atisData: AuroraAtisData | null) {
 
     } else {
         // Ha nincs adat, elrejtjük a panelt
-        out_atis.style.display = "none";
-        // Itt dönthetsz: maradjon az utolsó állapot, vagy fusson le a METAR alapú auto_rwy_selection()
+        out_atis.style.display = "block";
+        out_atis.innerHTML = "<a class='text-atis-red'>ATIS data not available!</a>";
         auto_rwy_selection(); 
     }
 }
@@ -198,12 +219,15 @@ async function load_data(data: MetarData, taf_data: TafData | undefined, atis_da
 }
 
 socket.on('weather_update', (data: any) => {
-    // Csak akkor fussunk tovább, ha legalább METAR-unk van
-    if (!data || !data.metar) {
-        console.log("DATA IS NOT AVAILABLE YET");
+    if (!data || !data.metar || !data.taf) {
+        console.log("DATA NOT AVAILABLE");
+        const out_atis = document.getElementById("atis");
+        if (out_atis) {
+            out_atis.style.display = "block";
+            out_atis.innerHTML = "<a class='text-atis-red'>DATA NOT AVAILABLE!</a>";
+        }
         return;
     }
 
-    const parsedAtis = data.atis ? parseAuroraAtis(data.atis) : null;
-    load_data(data.metar, data.taf, parsedAtis);
+    load_data(data.metar, data.taf, data.atis);
 });

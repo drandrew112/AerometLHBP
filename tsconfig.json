@@ -7,8 +7,11 @@
     "esModuleInterop": true,
     "skipLibCheck": true,
     "forceConsistentCasingInFileNames": true,
-    "outDir": "./dist",        // <--- Ez rakja külön mappába a JS fájlokat
-    "rootDir": "./src"            // <--- Biztosítja a projektstruktúra megtartását
+    "outDir": "./web/dist",        // <--- Ez rakja külön mappába a JS fájlokat
+    "rootDir": "./web/src"            // <--- Biztosítja a projektstruktúra megtartását
   },
-  "include": ["./src/**/*.ts", "./*.ts"]
+  "include": [
+    "./web/src/**/*.ts",
+    "./web/*.ts"
+  ]
 }
