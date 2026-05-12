@@ -12,24 +12,30 @@ Currently we have IVAO support only but working on a VATSIM support too.
 #### ATIS warnings
 ![ATIS Warnings](img/v3-warnings.png)
 ### Server Console
-![Server Console](img/v3-server.png)
+![Server Console](img/v4-server.png)
 
 ---
 
 ## ✨ Features
 
 *   **Realistic Display:** Designed to look and feel similar to the actual meteorological monitor used in Budapest (LHBP).
-*   **IVAO Aurora Integration:** Native ATIS readout directly from Aurora.
-*   **Intelligens ATIS Verification:**
+*   **IVAO Integration**
+    * Native ATIS readout directly from Aurora ATC software.
+*   **VATSIM Integration**
+    * Work in progress...
+*   **ATIS warnings**
     *   **Transition Level:** Automatic calculation based on the current QNH.
     *   **Runway Direction Check:** Monitors optimal runway usage based on wind direction and speed.
 *   **Real-time Updates:** Constant synchronization between the server and the display.
+*   **Fully customizable**
+    *   You can use this project as a template and customize for your airport.
 
 ---
 
 ## 🚀 Installation & Usage
 
-### 0. Install [Node.js](https://nodejs.org)
+### Requirements
+*   [Node.js](https://nodejs.org)
 
 ### 1. Install Dependencies
 Open a CMD where you unpacked the files
