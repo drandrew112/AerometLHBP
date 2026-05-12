@@ -24,8 +24,8 @@ export async function startServer(networkProvider) {const app = express();
     const updateWeather = async (force = false) => {
         if (io.sockets.sockets.size === 0 && !force) return;
         try {
-            const metar = await axios.get('https://aviationweather.gov/api/data/metar?ids=LHBP&format=json');
-            const taf = await axios.get('https://aviationweather.gov/api/data/taf?ids=LHBP&format=json');
+            const metar = await axios.get(`https://aviationweather.gov/api/data/metar?ids=${config.server.airport}&format=json`);
+            const taf = await axios.get(`https://aviationweather.gov/api/data/taf?ids=${config.server.airport}&format=json`);
             cacheData.metar = metar.data?.[0] || null;
             cacheData.taf = taf.data?.[0] || null;
         } catch (e) { consoleLog("Weather Update Error: " + e.message); }
@@ -54,8 +54,12 @@ export async function startServer(networkProvider) {const app = express();
     // Időzítők
     setInterval(() => updateStatusLine(io.sockets.sockets.size, networkProvider.name), config.server.statusLineUpdateInterval);
     setInterval(updateWeather, WEATHER_INTERVAL);
-    setInterval(updateATIS, config.server.atisUpdateInterval);
+    setInterval(updateATIS, networkProvider.config.atisUpdateInterval);
     setInterval(sendDataToAllClients, config.server.clientUpdateInterval);
+
+    app.get('/config', async (req, res) => {
+        res.json(config);
+    });
 
     server.listen(HTTP_PORT, '0.0.0.0', () => {
         consoleLog(`HTTP Server started on port ${HTTP_PORT}`);

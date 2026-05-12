@@ -4,15 +4,17 @@
     "logFile": "server.log",
     "statusLineUpdateInterval": 1000,
     "weatherUpdateInterval": 40000,
-    "atisUpdateInterval": 5000,
-    "clientUpdateInterval": 1000
+    "clientUpdateInterval": 1000,
+    "airport": "LHBP"
   },
   "ivao": {
     "auroraIp": "127.0.0.1",
-    "auroraPort": 1130
+    "auroraPort": 1130,
+    "atisUpdateInterval": 5000
   },
   "vatsim": {
     "apiUrl": "https://data.vatsim.net/v3/afv-atis-data.json",
-    "airport": "LHBP"
+    "stationId": "LHBP_ATIS",
+    "atisUpdateInterval": 15000
   }
 }

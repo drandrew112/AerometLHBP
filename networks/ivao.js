@@ -11,6 +11,7 @@ export class IvaoConnector {
         this.client = new net.Socket();
         this.lastData = "";
         this.isConnected = false;
+        this.config = config.ivao;
 
         // A figyelőket CSAK EGYSZER állítjuk be itt, a konstruktorban
         this.setupListeners();
@@ -73,7 +74,7 @@ export class IvaoConnector {
                 consoleLog("TCP Write error: " + e.message);
             }
         }
-        
+
         const parsedATIS = this.parseAuroraAtis(this.lastData);
         if (parsedATIS) {
             return parsedATIS;
