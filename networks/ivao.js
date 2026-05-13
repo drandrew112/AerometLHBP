@@ -5,7 +5,7 @@ import { config } from '../index.js';
 
 export class IvaoConnector {
     constructor(ip, port) {
-        this.name = "IVAO (Aurora TCP)";
+        this.name = "IVAO";
         this.ip = ip;
         this.port = port;
         this.client = new net.Socket();
