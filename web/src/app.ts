@@ -4,6 +4,8 @@ const socket = io({
     upgrade: false
 });
 
+import { config, Config } from "./main.js";
+
 // Eseménykezelők
 socket.on('connect', () => {
     console.log("Connected to server");
@@ -25,7 +27,7 @@ socket.on('disconnect', () => {
 
 
 
-import { MetarData, TafData, AuroraAtisData } from "./defs.js";
+import { MetarData, TafData, AtisData } from "./defs.js";
 
 let cache_metar: MetarData;
 
@@ -80,7 +82,7 @@ document.querySelectorAll(".runway-box").forEach(el => {
     });
 });
 
-function updateAtisUI(atisData: AuroraAtisData | null) {
+function updateAtisUI(atisData: AtisData | null) {
     const out_atis = document.getElementById("atis");
     if (!out_atis) return;
 
@@ -128,15 +130,32 @@ function updateAtisUI(atisData: AuroraAtisData | null) {
         }
 
         // Megjelenítés és tartalom frissítése
-        out_atis.style.display = "block";
-        let atis_text = `ATIS <a class='text-atis-green'>${atisData.infoLetter}</a>`;
-        atis_text += ` - ARR <a class='${arr_color}'>${atisData.arrRunway.join(", ")}</a>`;
-        atis_text += ` - DEP <a class='${dep_color}'>${atisData.depRunways.join(", ")}</a>`;
-        atis_text += ` - TFL <a class='${tfl_color}'>${atisData.transLvl}</a>`;
-        if (tfl != correct_tfl) {
-            atis_text += `<a class='text-atis-red'> (${correct_tfl})</a>`;
+        let atisTemplate = "ATIS [ATIS_LETTER], TIME [ATIS_TIME], ARR [ARR], DEP [DEP], TL [TL], [METAR]";
+        if (config?.server.networkProvider == "IVAO") {
+            atisTemplate = config?.ivao.atisText || "ATIS [ATIS_LETTER], TIME [ATIS_TIME], ARR [ARR], DEP [DEP], TL [TL], [METAR]";
         }
-        out_atis.innerHTML = atis_text;
+
+        const atisLetterHTML = `<a class='text-atis-green'>${atisData.infoLetter}</a>`;
+        const atisTimeHTML = `<a class='text-atis-green'>${atisData.atisTime}</a>`;
+        const arrHTML = `<a class='${arr_color}'>${atisData.arrRunway.join(", ")}</a>`;
+        const depHTML = `<a class='${dep_color}'>${atisData.depRunways.join(", ")}</a>`;
+
+        let tflHTML = `<a class='${tfl_color}'>${atisData.transLvl}</a>`;
+        if (tfl != correct_tfl) {
+            tflHTML += `<a class='text-atis-red'> (${correct_tfl})</a>`;
+        }
+
+        let finalAtis = atisTemplate
+            .replace(/\[ATIS_LETTER\]/g, atisLetterHTML)
+            .replace(/\[ATIS_TIME\]/g, atisTimeHTML || "n/a")
+            .replace(/\[ARR\]/g, arrHTML)
+            .replace(/\[DEP\]/g, depHTML)
+            .replace(/\[TL\]/g, tflHTML)
+            .replace(/\[METAR\]/g, cache_metar.rawOb.replace(`METAR `, "") || "n/a")
+            .replace(/\[REMARK\]/g, "n/a");
+
+        out_atis.style.display = "block";
+        out_atis.innerHTML = finalAtis;
         
         // Pályák aktiválása az ATIS alapján
         // Először minden pályát lekapcsolunk
@@ -156,24 +175,24 @@ function updateAtisUI(atisData: AuroraAtisData | null) {
     }
 }
 
-async function load_data(data: MetarData, taf_data: TafData | undefined, atis_data: AuroraAtisData | null) {
+async function load_data(data: MetarData, taf_data: TafData | undefined, atis_data: AtisData | null) {
     const out_qnh = document.getElementById("QNH");
     const wind_div = document.getElementById("wind_div");
     const out_wdir = document.getElementById("wind_dir");
     const out_wspd = document.getElementById("wind_spd");
     const out_conditions = document.getElementById("conditions");
 
-    const out_metar = document.getElementById("metar");
+    //const out_metar = document.getElementById("metar");
     const out_taf = document.getElementById("taf");
 
     const windArrow = document.getElementById("wind-arrow");
     const arrowHead = document.getElementById("arrow-head");
 
-    if (!out_qnh || !wind_div || !out_wdir || !out_wspd || !out_conditions || !out_metar || !out_taf || !windArrow || !arrowHead) return;
+    if (!out_qnh || !wind_div || !out_wdir || !out_wspd || !out_conditions || !out_taf || !windArrow || !arrowHead) return;
 
     if (data && taf_data) {
         // Update data
-        out_metar.innerHTML = data.rawOb || "METAR N/A";
+        //out_metar.innerHTML = data.rawOb || "METAR N/A";
         out_taf.innerHTML = taf_data.rawTAF || "TAF N/A";
 
         out_qnh.innerHTML = data.altim;

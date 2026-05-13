@@ -36,7 +36,7 @@
                     'atc-text-dim': '#64748b',
                     'atc-blue': '#8fc6f9',
                     'atc-blue-dim': '#8fc6f9dd',
-                    'atis-white': '#f2f2f2ff',
+                    'atis-text': '#f2f2f2aa',
                     'atis-green': '#4ade80',
                     'atis-yellow': '#fbbf24',
                     'atis-red': '#f87171',
@@ -47,9 +47,9 @@
         </script>
 
     </head>
-    <body class="bg-atc-bg text-atc-text select-none min-h-screen">
+    <body class="bg-atc-bg text-atc-text select-none min-h-screen flex flex-col">
         <!-- TOP BAR -->
-        <div class="absolute top-0 left-0 right-0 h-[70px] bg-atc-header z-50 flex items-center px-6 text-lg tracking-wide">
+        <div class="h-[70px] w-full bg-atc-header z-50 flex items-center px-6 text-lg tracking-wide shrink-0">
 
             <!-- LEFT: STATION -->
             <div class="flex-1 font-bold text-xl ml-0 mr-[30px]">
@@ -78,7 +78,7 @@
         </div>
 
         <!-- Content -->
-        <div class="absolute top-0 left-0 right-0 bottom-0 text-atc-text">
+        <div class="flex-1 flex justify-between items-center px-20 relative overflow-hidden">
             <!-- Runways -->
             <div class="absolute inset-0 flex justify-between items-center px-20">
 
@@ -187,12 +187,22 @@
                 </div>
             </div>
 
-            <div class="text-white absolute bottom-0 left-0 right-0 p-4 text-m">
-                <span id="metar" class="text-atc-blue text-s">Loading...</span><br/>
-                <span id="taf"   class="text-atc-blue-dim text-s">Loading...</span><br/>
-                <span id="atis"  class="text-atis-white text-s">Loading...</span>
-            </div>
+        </div>
 
+        
+        <!-- BOTTOM INFO PANEL -->
+        <div class="bg-[#1a1c1e] border-t border-atc-border shadow-2xl shrink-0">
+            <!-- Felső sáv a METAR és TAF számára -->
+            <div class="px-6 py-2 bg-black/30 border-b border-atc-border/30">
+                <div id="taf" class="text-atc-blue-dim text-[10px] font-mono truncate leading-tight">Loading TAF...</div>
+            </div>
+            
+            <!-- ATIS BOX - Ez fedi le az alját -->
+            <div class="px-6 py-4 min-h-[80px] flex items-center">
+                <div id="atis" class="text-atis-text text-lg tracking-wider w-full">
+                    <span class="animate-pulse text-atc-text-dim italic">Waiting for ATIS data...</span>
+                </div>
+            </div>
         </div>
 
         <script type="module" src="dist/main.js?v=1.0"></script>

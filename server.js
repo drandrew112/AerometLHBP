@@ -42,11 +42,14 @@ export async function startServer(networkProvider) {const app = express();
     }
 
     io.on('connection', (socket) => {
-        consoleLog(`${socket.handshake.address.replace('::ffff:', '')}: Connected`);
+        const clientIP = socket.handshake.address.replace('::ffff:', '');
+        
+        consoleLog(`${clientIP}: Connected`);
         updateWeather(true);
         socket.emit('weather_update', cacheData);
+
         socket.on('disconnect', () => {
-            consoleLog(`${socket.handshake.address.replace('::ffff:', '')}: Disconnected`);
+            consoleLog(`${clientIP}: Disconnected`);
             updateStatusLine(io.sockets.sockets.size, networkProvider.name);
         });
     });
@@ -58,7 +61,9 @@ export async function startServer(networkProvider) {const app = express();
     setInterval(sendDataToAllClients, config.server.clientUpdateInterval);
 
     app.get('/config', async (req, res) => {
-        res.json(config);
+        let out_config = config;
+        out_config.server.networkProvider = networkProvider.name;
+        res.json(out_config);
     });
 
     server.listen(HTTP_PORT, '0.0.0.0', () => {

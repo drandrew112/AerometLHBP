@@ -10,7 +10,8 @@
   "ivao": {
     "auroraIp": "127.0.0.1",
     "auroraPort": 1130,
-    "atisUpdateInterval": 5000
+    "atisUpdateInterval": 5000,
+    "atisText": "BUDAPEST INFORMATION [ATIS_LETTER], TIME [ATIS_TIME], EXPECT ILS APPROACH RUNWAY [ARR], DEPARTURE RUNWAY [DEP], TRANSITION LEVEL [TL], [METAR], ACKNOWLEDGE INFORMATION [ATIS_LETTER]"
   },
   "vatsim": {
     "apiUrl": "https://data.vatsim.net/v3/afv-atis-data.json",

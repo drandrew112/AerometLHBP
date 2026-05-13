@@ -13,6 +13,9 @@ export class IvaoConnector {
         this.isConnected = false;
         this.config = config.ivao;
 
+        this.lastAtisLetter = null;
+        this.atisTime = null;
+
         // A figyelőket CSAK EGYSZER állítjuk be itt, a konstruktorban
         this.setupListeners();
     }
@@ -56,8 +59,18 @@ export class IvaoConnector {
         // Ha nincs megadva ATIS betűjel (üres a szekció), tekintsük érvénytelennek
         if (!parts[1] || parts[1] === "") return null;
 
+        if (this.lastAtisLetter != parts[1] || this.lastAtisLetter === null) {
+            const now = new Date();
+            const hours = String(now.getUTCHours()).padStart(2, '0');
+            const minutes = String(now.getUTCMinutes()).padStart(2, '0');
+            this.atisTime = `${hours}${minutes}Z`;
+        }
+
+        this.lastAtisLetter = parts[1];
+
         return {
             infoLetter: parts[1],
+            atisTime: this.atisTime || "",
             icao: parts[2],
             arrRunway: parts[3] ? parts[3].trim().split(' ') : [],
             depRunways: parts[4] ? parts[4].trim().split(' ') : [],

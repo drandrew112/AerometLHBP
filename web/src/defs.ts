@@ -43,8 +43,9 @@ export interface TafResponse {
 
 // Aurora
 
-export interface AuroraAtisData {
+export interface AtisData {
     infoLetter: string;
+    atisTime: string;
     icao: string;
     arrRunway: string[];
     depRunways: string[];
