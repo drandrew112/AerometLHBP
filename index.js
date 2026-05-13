@@ -2,6 +2,7 @@ import readline from 'readline';
 import fs from 'fs';
 import { startServer } from './server.js';
 import { IvaoConnector } from './networks/ivao.js';
+import { VatsimConnector } from './networks/vatsim.js';
 import { getLocalIpAddress } from './lib/utils.js';
 import { initLog } from './lib/logger.js';
 
@@ -21,8 +22,9 @@ rl.question('> ', async (choice) => {
     let provider;
 
     if (choice === '2') {
-        // Később ide jön a VatsimConnector osztály
-        provider = { getATIS: async () => "VATSIM ATIS placeholder" };
+        provider = new VatsimConnector(
+            config.vatsim.apiUrl
+        );
     } else {
         provider = new IvaoConnector(
             config.ivao.auroraIp, 

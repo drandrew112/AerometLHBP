@@ -6,9 +6,10 @@ import { config } from '../index.js';
 // NOT COMPLETED YET, THIS IS JUST A PLACEHOLDER
 
 export class VatsimConnector {
-    constructor(ip, port) {
+    constructor(apiUrl) {
         this.name = "VATSIM";
         this.config = config.vatsim;
+        this.apiUrl = apiUrl;
     }
 
     parseVatsimAtis (rawAtis) {
