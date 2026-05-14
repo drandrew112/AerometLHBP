@@ -1,13 +1,15 @@
 import fs from 'fs';
 import path from 'path';
+const appDir = path.dirname(process.execPath);
+
 import { getLocalIpAddress } from './utils.js';
 
 import { config } from '../index.js';
 
-let logFilePath = path.join(process.cwd(), 'server.log');
+let logFilePath = path.join(appDir, 'server.log');
 
 export function initLog(logFile: string) {
-    logFilePath = path.isAbsolute(logFile) ? logFile : path.join(process.cwd(), logFile);
+    logFilePath = path.isAbsolute(logFile) ? logFile : path.join(appDir, logFile);
     fs.writeFileSync(logFilePath, '');
 }
 

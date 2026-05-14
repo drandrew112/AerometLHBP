@@ -1,0 +1,5 @@
+{
+  "main": "sea/main.js",
+  "output": "sea/sea-prep.blob",
+  "disableSentinel": false
+}

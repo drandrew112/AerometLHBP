@@ -8,7 +8,7 @@
   "main": "dist/index.js",
   "scripts": {
     "start": "npm run build:all && node dist/index.js",
-    "build:exe": "npx esbuild index.js --bundle --platform=node --format=cjs --outfile=dist/server.cjs && pkg dist/server.cjs --targets node18-win-x64 --output vAMET.exe",
+    "build:exe": "npm run build:all && npx esbuild index.ts --bundle --platform=node --format=cjs --outfile=sea/main.js && node --experimental-sea-config sea-config.json && node -e \"require('fs').copyFileSync(process.execPath, 'vAMET.exe')\" && npx postject vAMET.exe NODE_SEA_BLOB sea/sea-prep.blob --sentinel-fuse NODE_SEA_FUSE_fce680ab2cc467b6e072b8b5df1996b2",
     "build:server": "tsc",
     "build:web": "tsc -p ./web/tsconfig.json",
     "build:all": "npm run build:server && npm run build:web"
@@ -24,6 +24,7 @@
   "devDependencies": {
     "@types/cors": "^2.8.19",
     "@types/express": "^5.0.6",
-    "pkg": "^5.8.1"
+    "pkg": "^5.8.1",
+    "resedit": "^3.0.2"
   }
 }

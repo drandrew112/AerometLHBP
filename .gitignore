@@ -8,8 +8,10 @@
 !config.json
 !package.json
 !tsconfig.json
+!sea-config.json
 
 !lib/
 !networks/
+!web/tsconfig.json
 !web/index.html
 !web/src/
