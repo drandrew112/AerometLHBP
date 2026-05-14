@@ -3,8 +3,8 @@
 !readme.md
 !img/
 
-!index.js
-!server.js
+!index.ts
+!server.ts
 !config.json
 !package.json
 !tsconfig.json

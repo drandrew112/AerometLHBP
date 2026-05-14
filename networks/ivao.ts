@@ -3,8 +3,21 @@ import net from 'net';
 import { consoleLog } from '../lib/logger.js';
 import { config } from '../index.js';
 
-export class IvaoConnector {
-    constructor(ip, port) {
+import * as Defs from './../lib/defs.js';
+
+export class IvaoConnector implements Defs.NetworkProvider {
+    public name: string;
+    private ip: string;
+    private port: number;
+    private client: net.Socket;
+    private lastData: string;
+    private isConnected: boolean;
+    public config: any;
+
+    private lastAtisLetter: string | null;
+    private atisTime: string | null;
+
+    constructor(ip: string, port: number) {
         this.name = "IVAO";
         this.ip = ip;
         this.port = port;
@@ -52,7 +65,7 @@ export class IvaoConnector {
         }
     }
 
-    parseAuroraAtis (rawAtis) {
+    parseAuroraAtis (rawAtis: string) {
         if (!rawAtis || !rawAtis.startsWith('#ATIS') || rawAtis.split(';').length < 5) return null;
         
         const parts = rawAtis.split(';');
@@ -68,7 +81,7 @@ export class IvaoConnector {
 
         this.lastAtisLetter = parts[1];
 
-        return {
+        const output: Defs.AtisData = {
             infoLetter: parts[1],
             atisTime: this.atisTime || "",
             icao: parts[2],
@@ -77,14 +90,16 @@ export class IvaoConnector {
             transAlt: parts[5],
             transLvl: parts[6]
         };
+
+        return output;
     }
 
-    async getATIS() {
+    async getATIS(): Promise<Defs.AtisData | false> {
         if (this.isConnected) {
             try {
                 this.client.write('#ATIS\n');
             } catch (e) {
-                consoleLog("TCP Write error: " + e.message);
+                consoleLog(`TCP Write error: ${String(e)}`);
             }
         }
 

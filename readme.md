@@ -1,5 +1,5 @@
 # vAMET for LHBP
-![Version](https://img.shields.io/badge/version-4.2-blue?style=flat-square)
+![Version](https://img.shields.io/badge/version-5.0-blue?style=flat-square)
 [![Original Repo](https://img.shields.io/badge/original--repo--by--drandrew112-darkblue?style=flat-square&logo=github)](https://github.com/drandrew112/vAMET_LHBP)
 
 A Node.js and TypeScript-based tool for virtual air traffic controllers. This tool provides a highly realistic meteorological panel, replicating the layout and logic of the systems used in real-world Budapest (LHBP) operations.
@@ -35,26 +35,23 @@ Currently we have IVAO support only but working on a VATSIM support too.
 ---
 
 ## 🚀 Installation & Usage
-
 ### Requirements
 *   [Node.js](https://nodejs.org)
-
 ### 1. Install Dependencies
 Open a CMD where you unpacked the files
 ```bash
 npm install
 ```
-
-### 2. Build the Project
-Compile the TypeScript source code:
+### 2. Compile the TypeScript source codes
 ```bash
-tsc -p .
+npm run build:all
 ```
-
 ### 3. Start the Server
 ```bash
-node index.js
+node node dist/index.js
 ```
+### 4. Open a browser and connect
+`localhost` or `192.168.x.x:80`
 
 ---
 

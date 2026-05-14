@@ -1,15 +1,17 @@
 {
   "name": "vamet",
-  "version": "1.0.0",
-  "description": "",
+  "description": "vAMET - Virtual Aeromet panel for virtual air traffic controllers.",
+  "version": "5.0.0",
   "license": "ISC",
   "author": "DookthorAndriss",
   "type": "module",
-  "main": "index.js",
-  "bin": "index.js",
+  "main": "dist/index.js",
   "scripts": {
-    "start": "node index.js",
-    "build": "npx esbuild index.js --bundle --platform=node --format=cjs --outfile=dist/server.cjs && pkg dist/server.cjs --targets node18-win-x64 --output vAMET.exe"
+    "start": "npm run build:all && node dist/index.js",
+    "build:exe": "npx esbuild index.js --bundle --platform=node --format=cjs --outfile=dist/server.cjs && pkg dist/server.cjs --targets node18-win-x64 --output vAMET.exe",
+    "build:server": "tsc",
+    "build:web": "tsc -p ./web/tsconfig.json",
+    "build:all": "npm run build:server && npm run build:web"
   },
   "dependencies": {
     "axios": "^1.16.0",
@@ -20,6 +22,8 @@
     "typescript": "^6.0.3"
   },
   "devDependencies": {
+    "@types/cors": "^2.8.19",
+    "@types/express": "^5.0.6",
     "pkg": "^5.8.1"
   }
 }

@@ -5,10 +5,12 @@ import axios from 'axios';
 import cors from 'cors';
 import { updateStatusLine, writeToLog } from './lib/logger.js';
 
+import * as Defs from './lib/defs.js';
+
 import { consoleLog } from './lib/logger.js';
 import { config } from './index.js';
 
-export async function startServer(networkProvider) {const app = express();
+export async function startServer(networkProvider: Defs.NetworkProvider) {const app = express();
     const server = http.createServer(app);
     const io = new Server(server, { cors: { origin: "*" } });
 
@@ -19,16 +21,16 @@ export async function startServer(networkProvider) {const app = express();
     app.use(cors());
     app.use(express.static('./web/'));
 
-    let cacheData = { metar: null, taf: null, atis: null };
+    let cacheData: Defs.Data = { metar: "", taf: "", atis: null };
 
     const updateWeather = async (force = false) => {
         if (io.sockets.sockets.size === 0 && !force) return;
         try {
             const metar = await axios.get(`https://aviationweather.gov/api/data/metar?ids=${config.server.airport}&format=json`);
             const taf = await axios.get(`https://aviationweather.gov/api/data/taf?ids=${config.server.airport}&format=json`);
-            cacheData.metar = metar.data?.[0] || null;
-            cacheData.taf = taf.data?.[0] || null;
-        } catch (e) { consoleLog("Weather Update Error: " + e.message); }
+            cacheData.metar = metar.data?.[0] || "";
+            cacheData.taf = taf.data?.[0] || "";
+        } catch (e) { consoleLog(`Weather Update Error: ${String(e)}`); }
     };
 
     const updateATIS = async () => {
@@ -60,10 +62,8 @@ export async function startServer(networkProvider) {const app = express();
     setInterval(updateATIS, networkProvider.config.atisUpdateInterval);
     setInterval(sendDataToAllClients, config.server.clientUpdateInterval);
 
-    app.get('/config', async (req, res) => {
-        let out_config = config;
-        out_config.server.networkProvider = networkProvider.name;
-        res.json(out_config);
+    app.get('/config', async (req: express.Request, res: express.Response) => {
+        res.json(config);
     });
 
     server.listen(HTTP_PORT, '0.0.0.0', () => {

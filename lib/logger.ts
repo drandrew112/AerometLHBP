@@ -4,23 +4,24 @@ import { getLocalIpAddress } from './utils.js';
 
 import { config } from '../index.js';
 
-const logFilePath = path.join(process.cwd(), 'server.log');
+let logFilePath = path.join(process.cwd(), 'server.log');
 
-export function initLog() {
+export function initLog(logFile: string) {
+    logFilePath = path.isAbsolute(logFile) ? logFile : path.join(process.cwd(), logFile);
     fs.writeFileSync(logFilePath, '');
 }
 
-export function writeToLog(message) {
+export function writeToLog(message: string) {
     const timestamp = new Date().toISOString().replace(/T/, ' ').replace(/\..+/, '');
     const logEntry = `[${timestamp}] ${message}\n`;
     try {
         fs.appendFileSync(logFilePath, logEntry);
     } catch (err) {
-        process.stderr.write(`Could not write to log file: ${err.message}\n`);
+        process.stderr.write(`Could not write to log file: ${String(err)}\n`);
     }
 }
 
-export function updateStatusLine(clientCount, providerName = "N/A") {
+export function updateStatusLine(clientCount: number, providerName: string = "N/A") {
     // ANSI kódok magyarázata:
     // \x1b[s      - Kurzor pozíció mentése
     // \x1b[1;1H   - Kurzor mozgatása az 1. sor 1. oszlopába
@@ -40,7 +41,7 @@ export function updateStatusLine(clientCount, providerName = "N/A") {
     process.stdout.write(status);
 }
 
-export function consoleLog(msg) {
+export function consoleLog(msg: string) {
     const time = new Date().toTimeString().split(' ')[0];
     console.log(`\x1b[36m[${time}]\x1b[0m ${msg}`);
     writeToLog(msg);

@@ -1,19 +1,24 @@
 {
   "compilerOptions": {
     "target": "ESNext",
-    "module": "ESNext",
-    "moduleResolution": "node",
+    "module": "NodeNext",          // Node.js-hez a NodeNext a legbiztosabb
+    "moduleResolution": "NodeNext",
     "resolveJsonModule": true,
     "allowSyntheticDefaultImports": true,
     "strict": true,
     "esModuleInterop": true,
     "skipLibCheck": true,
     "forceConsistentCasingInFileNames": true,
-    "outDir": "./web/dist",        // <--- Ez rakja külön mappába a JS fájlokat
-    "rootDir": "./web/src"            // <--- Biztosítja a projektstruktúra megtartását
+    "outDir": "./dist",            // A lefordított JS fájlok helye
+    "rootDir": "./",               // A gyökérből indul a feltérképezés
+    "types": ["node"]              // Explicit módon mondjuk meg, hogy Node-ot használunk
   },
   "include": [
-    "./web/src/**/*.ts",
-    "./web/*.ts"
+    "**/*.ts"                      // Mindent nézünk
+  ],
+  "exclude": [
+    "node_modules",
+    "web",                         // <--- KRITIKUS: Ne fordítsa bele a web mappát!
+    "dist"                         // <--- Ne fordítsa önmagát
   ]
 }
