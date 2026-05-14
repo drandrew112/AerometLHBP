@@ -63,7 +63,9 @@ export async function startServer(networkProvider: Defs.NetworkProvider) {const 
     setInterval(sendDataToAllClients, config.server.clientUpdateInterval);
 
     app.get('/config', async (req: express.Request, res: express.Response) => {
-        res.json(config);
+        let output = config;
+        config.server.networkProvider = networkProvider.name;
+        res.json(output);
     });
 
     server.listen(HTTP_PORT, '0.0.0.0', () => {
