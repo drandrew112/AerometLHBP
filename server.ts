@@ -9,7 +9,9 @@ import * as Defs from './lib/defs.js';
 
 import path from "path";
 import fs from "fs";
-const appDir = path.dirname(process.execPath);
+const appDir = (process as any).sea
+    ? path.dirname(process.execPath)
+    : process.cwd();
 
 import { consoleLog } from './lib/logger.js';
 import { config } from './index.js';
@@ -23,7 +25,7 @@ export async function startServer(networkProvider: Defs.NetworkProvider) {const 
     const WEATHER_INTERVAL = config.server.weatherUpdateInterval;
 
     app.use(cors());
-    app.use(express.static(path.join(appDir, "web/dist")));
+    app.use(express.static(path.join(appDir, "web/")));
 
     let cacheData: Defs.Data = { metar: "", taf: "", atis: null };
 

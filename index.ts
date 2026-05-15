@@ -14,7 +14,9 @@ import { initLog } from './lib/logger.js';
 import * as Defs from './lib/defs.js';
 
 // Read config file
-const appDir = path.dirname(process.execPath);
+const appDir = (process as any).sea
+    ? path.dirname(process.execPath)
+    : process.cwd();
 const configPath = path.join(appDir, "config.json");
 export const config: Defs.Config = JSON.parse(fs.readFileSync(configPath, 'utf-8'));
 if (!config || !config.server || !config.ivao || !config.vatsim) {

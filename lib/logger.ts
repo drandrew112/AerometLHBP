@@ -1,6 +1,8 @@
 import fs from 'fs';
 import path from 'path';
-const appDir = path.dirname(process.execPath);
+const appDir = (process as any).sea
+    ? path.dirname(process.execPath)
+    : process.cwd();
 
 import { getLocalIpAddress } from './utils.js';
 
