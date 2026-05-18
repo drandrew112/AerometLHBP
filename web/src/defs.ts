@@ -24,11 +24,6 @@ export interface MetarData {
     fltCat: string;
 }
 
-export interface MetarResponse {
-    error?: string;
-    data?: MetarData;
-}
-
 // TAF
 
 export interface TafData {
@@ -36,12 +31,7 @@ export interface TafData {
     rawTAF: string;
 }
 
-export interface TafResponse {
-    error?: string;
-    data?: TafData;
-}
-
-// Aurora
+// ATIS
 
 export interface AtisData {
     infoLetter: string;
@@ -51,4 +41,5 @@ export interface AtisData {
     depRunways: string[];
     transAlt: string;
     transLvl: string;
+    rawText?: string;
 }
