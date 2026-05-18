@@ -41,4 +41,27 @@ export interface AtisData {
     depRunways: string[];
     transAlt: string;
     transLvl: string;
+    rawText?: string;
+}
+
+export interface VatsimAtisData {
+    cid: number;
+    name: string;
+    real_name: string;
+    callsign: string;
+    frequency: string;
+    facility: number;
+    rating: number;
+    latitude: number;
+    longitude: number;
+    server: string;
+    visual_range: number;
+    atis_code: string;
+    text_atis: string[];
+    last_updated: string;
+    logon_time: string;
+}
+
+export interface VatsimAtisResponse {
+    atis: VatsimAtisData[];
 }
