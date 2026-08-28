@@ -1,7 +1,7 @@
 {
   "name": "vamet",
   "description": "vAMET - Virtual Aeromet panel for virtual air traffic controllers.",
-  "version": "5.0.0",
+  "version": "6.0.0",
   "license": "ISC",
   "author": "DookthorAndriss",
   "type": "module",

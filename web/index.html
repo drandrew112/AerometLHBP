@@ -1,21 +1,20 @@
 <!DOCTYPE html>
 <html lang="en">
-    <head>
-        <title>vAMET</title>
-        <meta property="og:title" content="vAMET" />
-        <meta name="author" content="DookthorAndriss">
-        <meta property="og:type" content="website" />
-        <meta property="og:description" content="Professional Wx/ATIS window" />
-        <meta name="theme-color" content="#0a1628">
-        <meta name="darkreader-lock">
-        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+<head>
+    <title>vAMET</title>
+    <meta property="og:title" content="vAMET" />
+    <meta name="author" content="DookthorAndriss">
+    <meta property="og:type" content="website" />
+    <meta property="og:description" content="Professional Wx/ATIS window" />
+    <meta name="theme-color" content="#0a1628">
+    <meta name="darkreader-lock">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-        <script src="/socket.io/socket.io.js"></script>
+    <script src="/socket.io/socket.io.js"></script>
+    <script src="https://cdn.tailwindcss.com"></script>
 
-        <!-- Tailwind CSS CDN -->
-        <script src="https://cdn.tailwindcss.com"></script>
-        <script>
-        tailwind.config = {
+    <script>
+    tailwind.config = {
         theme: {
             extend: {
                 colors: {
@@ -23,11 +22,7 @@
                     'atc-header': '#118011',
                     'atc-card': '#162544',
                     'atc-card-hover': '#263656',
-                    'atc-card-red': '#441616',
-                    'atc-card-red-hover': '#562626',
                     'atc-border': '#1e3a5f',
-                    'atc-primary': '#2563eb',
-                    'atc-primary-hover': '#3b82f6',
                     'atc-amber': '#ff8c00',
                     'atc-cyan': '#22d3ee',
                     'atc-green': '#4ade80',
@@ -43,168 +38,371 @@
                 },
             }
         }
+    }
+    </script>
+
+    <style>
+        html, body {
+            overflow: hidden;
         }
-        </script>
 
-    </head>
-    <body class="bg-atc-bg text-atc-text select-none min-h-screen flex flex-col">
-        <!-- TOP BAR -->
-        <div class="h-[70px] w-full bg-atc-header z-50 flex items-center px-6 text-lg tracking-wide shrink-0">
+        .wind-rose {
+            position: relative;
+            width: 138px;
+            height: 138px;
+            border: 2px solid #1e3a5f;
+            border-radius: 9999px;
+            background: rgba(0, 0, 0, 0.16);
+            flex-shrink: 0;
+            overflow: visible;
+        }
 
-            <!-- LEFT: STATION -->
-            <div class="flex-1 font-bold text-xl ml-0 mr-[30px]">
-                <span>vAMET <span id="airport_code">----</span></span>
-            </div>
+        .wind-rose .cardinal {
+            display: none;
+            position: absolute;
+            z-index: 20;
+            color: #64748b;
+            font-size: 9px;
+            font-weight: 700;
+            line-height: 1;
+        }
 
-            <!-- CENTER: QNH -->
-            <div class="flex items-center gap-2 mr-[60px]">
-                <span class="uppercase text-m">QNH</span>
-                <div class="font-bold text-5xl rounded-sm shadow-inner">
-                    <span id="QNH">----</span>
-                </div>
-            </div>
+        .wind-rose .north { top: 9px; left: 50%; transform: translateX(-50%); }
+        .wind-rose .east  { right: 9px; top: 50%; transform: translateY(-50%); }
+        .wind-rose .south { bottom: 9px; left: 50%; transform: translateX(-50%); }
+        .wind-rose .west  { left: 9px; top: 50%; transform: translateY(-50%); }
 
-            <!-- WIND -->
-            <div id="wind_div" class="flex items-center gap-2 ml-[30px] bg-black px-2 py-1">
-                <span id="wind_dir" class="font-semibold text-4xl">---</span>
-                <span class="text-sm">/</span>
-                <span id="wind_spd" class="font-semibold text-4xl">--</span>
-            </div>
+        .wind-rose .degree-label {
+            position: absolute;
+            z-index: 40;
+            color: #64748b;
+            font-size: 8px;
+            font-weight: 700;
+            line-height: 1;
+            white-space: nowrap;
+            pointer-events: none;
+        }
 
-            <!-- CONDITIONS -->
-            <div class="flex-1 flex justify-end font-bold text-xl">
-                <span id="conditions">---</span>
+        .wind-rose .ticks {
+            position: absolute;
+            inset: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+        }
+
+        .wind-rose .runway-axis {
+            position: absolute;
+            inset: 50% auto auto 50%;
+            width: 2px;
+            height: 104px;
+            background: rgba(100, 116, 139, 0.38);
+            border-left: 1px dashed rgba(156, 163, 175, 0.58);
+            transform-origin: 50% 50%;
+            margin-left: -1px;
+            margin-top: -52px;
+            border-radius: 2px;
+        }
+
+        .wind-rose .wind-arrow {
+            position: absolute;
+            inset: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 30;
+            transition: transform 700ms ease-in-out;
+            pointer-events: none;
+        }
+
+        .wind-rose .wind-dot {
+            position: absolute;
+            left: 50%;
+            top: 50%;
+            width: 4px;
+            height: 4px;
+            margin-left: -2px;
+            margin-top: -2px;
+            background: #475569;
+            border-radius: 9999px;
+            z-index: 25;
+        }
+
+        .wind-rose .wind-readout {
+            position: absolute;
+            left: 50%;
+            top: 50%;
+            transform: translate(-50%, -50%);
+            z-index: 35;
+            width: 100%;
+            min-width: 0;
+            text-align: center;
+            color: #e2e8f0;
+            font-size: 28px;
+            font-weight: 900;
+            line-height: 1;
+            letter-spacing: 0.01em;
+            white-space: nowrap;
+            text-shadow: 0 1px 3px #000;
+        }
+
+        .wind-rose .wind-unit {
+            display: inline;
+            margin-top: 0;
+            margin-left: 6px;
+            color: #e2e8f0;
+            font-size: 28px;
+            font-weight: 900;
+        }
+
+
+        .runway-divider {
+            grid-column: 1 / -1;
+            height: 1px;
+            background: #1e3a5f;
+            opacity: 0.9;
+            margin: 2px 0 2px;
+        }
+
+        .runway-row {
+            display: flex;
+            align-items: center;
+            gap: 44px;
+            min-width: 0;
+        }
+
+        .runway-row.left {
+            justify-content: flex-start;
+        }
+
+        .runway-row.right {
+            justify-content: flex-end;
+        }
+
+        .runway-box {
+            min-width: 70px;
+            min-height: 56px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .utc-clock {
+            display: flex;
+            align-items: baseline;
+            gap: 1px;
+            padding: 2px 8px;
+            background: #e4c300;
+            color: #142013;
+            line-height: 1;
+            align-items: center;
+            font-variant-numeric: tabular-nums;
+        }
+
+        .utc-small {
+            font-size: 1rem;
+            font-weight: 700;
+            opacity: 0.9;
+            line-height: 1;
+        }
+
+        .utc-minute {
+            font-size: 1.65rem;
+            font-weight: 900;
+            letter-spacing: 0.02em;
+            line-height: 1;
+        }
+
+        .atis-letter-top {
+            color: #ffe55b;
+            font-weight: 800;
+            font-size: 1.15rem;
+            min-width: 34px;
+            text-align: center;
+        }
+
+        @media (max-width: 900px) {
+            .wind-rose {
+                width: 112px;
+                height: 112px;
+            }
+
+            .wind-rose .runway-axis {
+                height: 84px;
+                margin-top: -42px;
+            }
+
+            .runway-box {
+                min-width: 60px;
+                min-height: 48px;
+                font-size: 1.45rem;
+            }
+        }
+    </style>
+</head>
+
+<body class="bg-atc-bg text-atc-text select-none min-h-screen flex flex-col">
+
+    <!-- TOP BAR -->
+    <div class="h-[70px] w-full bg-atc-header z-50 flex items-center px-6 text-lg tracking-wide shrink-0 relative">
+
+        <!-- LEFT: STATION -->
+        <div class="absolute left-8 font-bold text-xl">
+            <span class="inline-flex items-center gap-1">
+                vAMET 
+                <span id="airport_code" class="text-xs">----</span>
+            </span>
+        </div>
+
+        <!-- QNH: deliberately left of center -->
+        <div class="absolute left-[30%] -translate-x-1/2 flex items-center gap-2">
+            <span class="uppercase text-sm">QNH</span>
+            <div class="font-bold text-4xl rounded-sm shadow-inner">
+                <span id="QNH">----</span>
             </div>
         </div>
 
-        <!-- Content -->
-        <div class="flex-1 flex justify-between items-center px-20 relative overflow-hidden">
-            <!-- Runways -->
-            <div class="absolute inset-0 flex justify-between items-center px-20">
+        <!-- UTC: always centered -->
+        <div class="absolute left-1/2 -translate-x-1/2 flex items-center gap-2 h-full">
+            <span class="text-xs uppercase font-semibold">UTC</span>
+            <div id="utc_time" class="utc-clock" aria-label="UTC time">
+                <span id="utc-hour" class="utc-small">--</span>
+                <span class="utc-colon utc-small">:</span>
+                <span id="utc-minute" class="utc-minute">--</span>
+                <span class="utc-colon utc-small">:</span>
+                <span id="utc-second" class="utc-small">--</span>
+            </div>
+        </div>
 
-                <!-- ===== LEFT SIDE ===== -->
-                <div class="flex flex-col justify-center gap-16">
-                    <!-- 31L -->
-                    <div class="flex items-center gap-6">
-                        <div id="rwy-31L"
-                            class="runway-box bg-gray-600 px-3 py-6 text-3xl font-bold cursor-pointer transition">
-                            31L
-                        </div>
-                    </div>
+        <!-- ATIS LETTER -->
+        <div id="atis-letter-top" class="absolute left-[calc(50%+115px)] -translate-x-1/2 atis-letter-top">-</div>
 
-                    <!-- 31R -->
-                    <div class="flex items-center gap-6">
-                        <div id="rwy-31R"
-                            class="runway-box bg-gray-600 px-3 py-6 text-3xl font-bold cursor-pointer transition">
-                            31R
-                        </div>
+        <!-- CONDITIONS -->
+        <div class="absolute right-0 top-0 h-full min-w-[145px] px-8 flex items-center justify-center bg-[#e4c300] font-bold text-xl text-[#142013]">
+            <span id="conditions">---</span>
+        </div>
+    </div>
+
+    <!-- RUNWAY / WIND ROSES -->
+    <main class="flex-1 flex items-center justify-center px-8 py-6 overflow-hidden">
+        <div class="w-full max-w-[1240px] grid grid-cols-2 gap-x-32 gap-y-16 mx-auto">
+
+            <!-- LEFT SIDE / 31L -->
+            <div class="runway-row left">
+                <div class="wind-rose" data-runway="31L" aria-label="Wind for runway 31L">
+                    <svg class="ticks" viewBox="0 0 100 100">
+                        <g stroke="currentColor" class="text-atc-border/60">
+                            <line x1="88" y1="50" x2="96" y2="50" stroke-width="0.85" transform="rotate(0 50 50)" /><line x1="91" y1="50" x2="96" y2="50" stroke-width="0.45" transform="rotate(10 50 50)" /><line x1="91" y1="50" x2="96" y2="50" stroke-width="0.45" transform="rotate(20 50 50)" /><line x1="91" y1="50" x2="96" y2="50" stroke-width="0.45" transform="rotate(30 50 50)" /><line x1="88" y1="50" x2="96" y2="50" stroke-width="0.85" transform="rotate(40 50 50)" /><line x1="91" y1="50" x2="96" y2="50" stroke-width="0.45" transform="rotate(50 50 50)" /><line x1="91" y1="50" x2="96" y2="50" stroke-width="0.45" transform="rotate(60 50 50)" /><line x1="91" y1="50" x2="96" y2="50" stroke-width="0.45" transform="rotate(70 50 50)" /><line x1="88" y1="50" x2="96" y2="50" stroke-width="0.85" transform="rotate(80 50 50)" /><line x1="91" y1="50" x2="96" y2="50" stroke-width="0.45" transform="rotate(90 50 50)" /><line x1="91" y1="50" x2="96" y2="50" stroke-width="0.45" transform="rotate(100 50 50)" /><line x1="91" y1="50" x2="96" y2="50" stroke-width="0.45" transform="rotate(110 50 50)" /><line x1="88" y1="50" x2="96" y2="50" stroke-width="0.85" transform="rotate(120 50 50)" /><line x1="91" y1="50" x2="96" y2="50" stroke-width="0.45" transform="rotate(130 50 50)" /><line x1="91" y1="50" x2="96" y2="50" stroke-width="0.45" transform="rotate(140 50 50)" /><line x1="91" y1="50" x2="96" y2="50" stroke-width="0.45" transform="rotate(150 50 50)" /><line x1="88" y1="50" x2="96" y2="50" stroke-width="0.85" transform="rotate(160 50 50)" /><line x1="91" y1="50" x2="96" y2="50" stroke-width="0.45" transform="rotate(170 50 50)" /><line x1="91" y1="50" x2="96" y2="50" stroke-width="0.45" transform="rotate(180 50 50)" /><line x1="91" y1="50" x2="96" y2="50" stroke-width="0.45" transform="rotate(190 50 50)" /><line x1="88" y1="50" x2="96" y2="50" stroke-width="0.85" transform="rotate(200 50 50)" /><line x1="91" y1="50" x2="96" y2="50" stroke-width="0.45" transform="rotate(210 50 50)" /><line x1="91" y1="50" x2="96" y2="50" stroke-width="0.45" transform="rotate(220 50 50)" /><line x1="91" y1="50" x2="96" y2="50" stroke-width="0.45" transform="rotate(230 50 50)" /><line x1="88" y1="50" x2="96" y2="50" stroke-width="0.85" transform="rotate(240 50 50)" /><line x1="91" y1="50" x2="96" y2="50" stroke-width="0.45" transform="rotate(250 50 50)" /><line x1="91" y1="50" x2="96" y2="50" stroke-width="0.45" transform="rotate(260 50 50)" /><line x1="91" y1="50" x2="96" y2="50" stroke-width="0.45" transform="rotate(270 50 50)" /><line x1="88" y1="50" x2="96" y2="50" stroke-width="0.85" transform="rotate(280 50 50)" /><line x1="91" y1="50" x2="96" y2="50" stroke-width="0.45" transform="rotate(290 50 50)" /><line x1="91" y1="50" x2="96" y2="50" stroke-width="0.45" transform="rotate(300 50 50)" /><line x1="91" y1="50" x2="96" y2="50" stroke-width="0.45" transform="rotate(310 50 50)" /><line x1="88" y1="50" x2="96" y2="50" stroke-width="0.85" transform="rotate(320 50 50)" /><line x1="91" y1="50" x2="96" y2="50" stroke-width="0.45" transform="rotate(330 50 50)" /><line x1="91" y1="50" x2="96" y2="50" stroke-width="0.45" transform="rotate(340 50 50)" /><line x1="91" y1="50" x2="96" y2="50" stroke-width="0.45" transform="rotate(350 50 50)" />
+                        </g>
+                    </svg>
+                    <div class="runway-axis rotate-[310deg]"></div>
+                    <svg id="wind-arrow-31L" class="wind-arrow" viewBox="0 0 100 100">
+                        <polygon points="50,96 45.5,86 54.5,86" fill="#fff59d" />
+                    </svg>
+                    <div class="wind-readout">
+                        <span id="wind-dir-31L">---</span>
+                        <span class="wind-unit"><span id="wind-spd-31L">--</span></span>
                     </div>
+                    <div class="wind-dot"></div>
                 </div>
+                <div id="rwy-31L" class="runway-box bg-gray-600 px-3 py-4 text-3xl font-bold cursor-pointer transition">31L</div>
+            </div>
 
-                <div class="flex-1 flex justify-center items-center relative scale-110">
-                    <div class="relative w-72 h-72 border-2 border-atc-border rounded-full flex justify-center items-center bg-black/20">
-                        
-                        <span class="absolute top-2 font-bold text-atc-text-dim text-xs z-20">N</span>
-                        <span class="absolute right-2 font-bold text-atc-text-dim text-xs z-20">E</span>
-                        <span class="absolute bottom-2 font-bold text-atc-text-dim text-xs z-20">S</span>
-                        <span class="absolute left-2 font-bold text-atc-text-dim text-xs z-20">W</span>
-                        
-                        <svg class="absolute inset-0 w-full h-full -rotate-90 pointer-events-none" viewBox="0 0 100 100">
-                            <defs>
-                                <line id="tick" x1="92" y1="50" x2="96" y2="50" stroke="currentColor" stroke-width="0.5" class="text-atc-border/60" />
-                                <line id="tick-long" x1="88" y1="50" x2="96" y2="50" stroke="currentColor" stroke-width="0.8" class="text-atc-border" />
-                            </defs>
-                            <g>
-                                <use href="#tick" transform="rotate(0 50 50)" />
-                                <use href="#tick" transform="rotate(10 50 50)" />
-                                <use href="#tick" transform="rotate(20 50 50)" />
-                                <use href="#tick" transform="rotate(30 50 50)" />
-                                <use href="#tick-long" transform="rotate(40 50 50)" />
-                                <use href="#tick" transform="rotate(50 50 50)" />
-                                <use href="#tick" transform="rotate(60 50 50)" />
-                                <use href="#tick" transform="rotate(70 50 50)" />
-                                <use href="#tick" transform="rotate(80 50 50)" />
-                                <use href="#tick" transform="rotate(90 50 50)" />
-                                <use href="#tick" transform="rotate(100 50 50)" />
-                                <use href="#tick" transform="rotate(110 50 50)" />
-                                <use href="#tick" transform="rotate(120 50 50)" />
-                                <use href="#tick-long" transform="rotate(130 50 50)" />
-                                <use href="#tick" transform="rotate(140 50 50)" />
-                                <use href="#tick" transform="rotate(150 50 50)" />
-                                <use href="#tick" transform="rotate(160 50 50)" />
-                                <use href="#tick" transform="rotate(170 50 50)" />
-                                <use href="#tick" transform="rotate(180 50 50)" />
-                                <use href="#tick" transform="rotate(190 50 50)" />
-                                <use href="#tick" transform="rotate(200 50 50)" />
-                                <use href="#tick" transform="rotate(210 50 50)" />
-                                <use href="#tick-long" transform="rotate(220 50 50)" />
-                                <use href="#tick" transform="rotate(230 50 50)" />
-                                <use href="#tick" transform="rotate(240 50 50)" />
-                                <use href="#tick" transform="rotate(250 50 50)" />
-                                <use href="#tick" transform="rotate(260 50 50)" />
-                                <use href="#tick" transform="rotate(270 50 50)" />
-                                <use href="#tick" transform="rotate(280 50 50)" />
-                                <use href="#tick" transform="rotate(290 50 50)" />
-                                <use href="#tick" transform="rotate(300 50 50)" />
-                                <use href="#tick-long" transform="rotate(310 50 50)" />
-                                <use href="#tick" transform="rotate(320 50 50)" />
-                                <use href="#tick" transform="rotate(330 50 50)" />
-                                <use href="#tick" transform="rotate(340 50 50)" />
-                                <use href="#tick" transform="rotate(350 50 50)" />
-                            </g>
-                        </svg>
-
-                        <div class="absolute w-2 h-44 bg-gray-700/50 rotate-[130deg] rounded-sm z-10">
-                            <div class="absolute inset-y-0 left-1/2 -translate-x-1/2 w-[1px] bg-gray-500/50 border-l border-dashed border-gray-400"></div>
-                        </div>
-                        
-                        <svg id="wind-arrow" class="absolute w-full h-full transition-transform duration-1000 ease-in-out z-30" viewBox="0 0 100 100">
-                            <polygon points="50,96 46,88 54,88" fill="#ff8c00" id="arrow-head" 
-                                    transform="rotate(180 50 92)" />
-                        </svg>
-
-                        <div class="w-1 h-1 bg-atc-border rounded-full z-20"></div>
-                    </div>
+            <!-- RIGHT SIDE / 13R -->
+            <div class="runway-row right">
+                <div id="rwy-13R" class="runway-box bg-gray-600 px-3 py-4 text-3xl font-bold cursor-pointer transition">13R</div>
+                <div class="wind-rose" data-runway="13R" aria-label="Wind for runway 13R">
+                    <svg class="ticks" viewBox="0 0 100 100"><g stroke="currentColor" class="text-atc-border/60">
+                        <line x1="88" y1="50" x2="96" y2="50" stroke-width="0.85" transform="rotate(0 50 50)" /><line x1="91" y1="50" x2="96" y2="50" stroke-width="0.45" transform="rotate(10 50 50)" /><line x1="91" y1="50" x2="96" y2="50" stroke-width="0.45" transform="rotate(20 50 50)" /><line x1="91" y1="50" x2="96" y2="50" stroke-width="0.45" transform="rotate(30 50 50)" /><line x1="88" y1="50" x2="96" y2="50" stroke-width="0.85" transform="rotate(40 50 50)" /><line x1="91" y1="50" x2="96" y2="50" stroke-width="0.45" transform="rotate(50 50 50)" /><line x1="91" y1="50" x2="96" y2="50" stroke-width="0.45" transform="rotate(60 50 50)" /><line x1="91" y1="50" x2="96" y2="50" stroke-width="0.45" transform="rotate(70 50 50)" /><line x1="88" y1="50" x2="96" y2="50" stroke-width="0.85" transform="rotate(80 50 50)" /><line x1="91" y1="50" x2="96" y2="50" stroke-width="0.45" transform="rotate(90 50 50)" /><line x1="91" y1="50" x2="96" y2="50" stroke-width="0.45" transform="rotate(100 50 50)" /><line x1="91" y1="50" x2="96" y2="50" stroke-width="0.45" transform="rotate(110 50 50)" /><line x1="88" y1="50" x2="96" y2="50" stroke-width="0.85" transform="rotate(120 50 50)" /><line x1="91" y1="50" x2="96" y2="50" stroke-width="0.45" transform="rotate(130 50 50)" /><line x1="91" y1="50" x2="96" y2="50" stroke-width="0.45" transform="rotate(140 50 50)" /><line x1="91" y1="50" x2="96" y2="50" stroke-width="0.45" transform="rotate(150 50 50)" /><line x1="88" y1="50" x2="96" y2="50" stroke-width="0.85" transform="rotate(160 50 50)" /><line x1="91" y1="50" x2="96" y2="50" stroke-width="0.45" transform="rotate(170 50 50)" /><line x1="91" y1="50" x2="96" y2="50" stroke-width="0.45" transform="rotate(180 50 50)" /><line x1="91" y1="50" x2="96" y2="50" stroke-width="0.45" transform="rotate(190 50 50)" /><line x1="88" y1="50" x2="96" y2="50" stroke-width="0.85" transform="rotate(200 50 50)" /><line x1="91" y1="50" x2="96" y2="50" stroke-width="0.45" transform="rotate(210 50 50)" /><line x1="91" y1="50" x2="96" y2="50" stroke-width="0.45" transform="rotate(220 50 50)" /><line x1="91" y1="50" x2="96" y2="50" stroke-width="0.45" transform="rotate(230 50 50)" /><line x1="88" y1="50" x2="96" y2="50" stroke-width="0.85" transform="rotate(240 50 50)" /><line x1="91" y1="50" x2="96" y2="50" stroke-width="0.45" transform="rotate(250 50 50)" /><line x1="91" y1="50" x2="96" y2="50" stroke-width="0.45" transform="rotate(260 50 50)" /><line x1="91" y1="50" x2="96" y2="50" stroke-width="0.45" transform="rotate(270 50 50)" /><line x1="88" y1="50" x2="96" y2="50" stroke-width="0.85" transform="rotate(280 50 50)" /><line x1="91" y1="50" x2="96" y2="50" stroke-width="0.45" transform="rotate(290 50 50)" /><line x1="91" y1="50" x2="96" y2="50" stroke-width="0.45" transform="rotate(300 50 50)" /><line x1="91" y1="50" x2="96" y2="50" stroke-width="0.45" transform="rotate(310 50 50)" /><line x1="88" y1="50" x2="96" y2="50" stroke-width="0.85" transform="rotate(320 50 50)" /><line x1="91" y1="50" x2="96" y2="50" stroke-width="0.45" transform="rotate(330 50 50)" /><line x1="91" y1="50" x2="96" y2="50" stroke-width="0.45" transform="rotate(340 50 50)" /><line x1="91" y1="50" x2="96" y2="50" stroke-width="0.45" transform="rotate(350 50 50)" />
+                    </g></svg>
+                    <div class="runway-axis rotate-[130deg]"></div>
+                    <svg id="wind-arrow-13R" class="wind-arrow" viewBox="0 0 100 100"><polygon points="50,96 45.5,86 54.5,86" fill="#fff59d" /></svg>
+                    <div class="wind-readout"><span id="wind-dir-13R">---</span><span class="wind-unit"><span id="wind-spd-13R">--</span></span></div>
+                    <div class="wind-dot"></div>
                 </div>
+            </div>
 
-                <!-- ===== RIGHT SIDE ===== -->
-                <div class="flex flex-col justify-center gap-16">
-                    <!-- 13R -->
-                    <div class="flex items-center gap-6 flex-row-reverse">
-                        <div id="rwy-13R"
-                            class="runway-box bg-gray-600 px-3 py-6 text-3xl font-bold cursor-pointer transition">
-                            13R
-                        </div>
-                    </div>
+            <div class="runway-divider" aria-hidden="true"></div>
 
-                    <!-- 13L -->
-                    <div class="flex items-center gap-6 flex-row-reverse">
-                        <div id="rwy-13L"
-                            class="runway-box bg-gray-600 px-3 py-6 text-3xl font-bold cursor-pointer transition">
-                            13L
-                        </div>
-                    </div>
+            <!-- LEFT SIDE / 31R -->
+            <div class="runway-row left">
+                <div class="wind-rose" data-runway="31R" aria-label="Wind for runway 31R">
+                    <svg class="ticks" viewBox="0 0 100 100"><g stroke="currentColor" class="text-atc-border/60">
+                        <line x1="88" y1="50" x2="96" y2="50" stroke-width="0.85" transform="rotate(0 50 50)" /><line x1="91" y1="50" x2="96" y2="50" stroke-width="0.45" transform="rotate(10 50 50)" /><line x1="91" y1="50" x2="96" y2="50" stroke-width="0.45" transform="rotate(20 50 50)" /><line x1="91" y1="50" x2="96" y2="50" stroke-width="0.45" transform="rotate(30 50 50)" /><line x1="88" y1="50" x2="96" y2="50" stroke-width="0.85" transform="rotate(40 50 50)" /><line x1="91" y1="50" x2="96" y2="50" stroke-width="0.45" transform="rotate(50 50 50)" /><line x1="91" y1="50" x2="96" y2="50" stroke-width="0.45" transform="rotate(60 50 50)" /><line x1="91" y1="50" x2="96" y2="50" stroke-width="0.45" transform="rotate(70 50 50)" /><line x1="88" y1="50" x2="96" y2="50" stroke-width="0.85" transform="rotate(80 50 50)" /><line x1="91" y1="50" x2="96" y2="50" stroke-width="0.45" transform="rotate(90 50 50)" /><line x1="91" y1="50" x2="96" y2="50" stroke-width="0.45" transform="rotate(100 50 50)" /><line x1="91" y1="50" x2="96" y2="50" stroke-width="0.45" transform="rotate(110 50 50)" /><line x1="88" y1="50" x2="96" y2="50" stroke-width="0.85" transform="rotate(120 50 50)" /><line x1="91" y1="50" x2="96" y2="50" stroke-width="0.45" transform="rotate(130 50 50)" /><line x1="91" y1="50" x2="96" y2="50" stroke-width="0.45" transform="rotate(140 50 50)" /><line x1="91" y1="50" x2="96" y2="50" stroke-width="0.45" transform="rotate(150 50 50)" /><line x1="88" y1="50" x2="96" y2="50" stroke-width="0.85" transform="rotate(160 50 50)" /><line x1="91" y1="50" x2="96" y2="50" stroke-width="0.45" transform="rotate(170 50 50)" /><line x1="91" y1="50" x2="96" y2="50" stroke-width="0.45" transform="rotate(180 50 50)" /><line x1="91" y1="50" x2="96" y2="50" stroke-width="0.45" transform="rotate(190 50 50)" /><line x1="88" y1="50" x2="96" y2="50" stroke-width="0.85" transform="rotate(200 50 50)" /><line x1="91" y1="50" x2="96" y2="50" stroke-width="0.45" transform="rotate(210 50 50)" /><line x1="91" y1="50" x2="96" y2="50" stroke-width="0.45" transform="rotate(220 50 50)" /><line x1="91" y1="50" x2="96" y2="50" stroke-width="0.45" transform="rotate(230 50 50)" /><line x1="88" y1="50" x2="96" y2="50" stroke-width="0.85" transform="rotate(240 50 50)" /><line x1="91" y1="50" x2="96" y2="50" stroke-width="0.45" transform="rotate(250 50 50)" /><line x1="91" y1="50" x2="96" y2="50" stroke-width="0.45" transform="rotate(260 50 50)" /><line x1="91" y1="50" x2="96" y2="50" stroke-width="0.45" transform="rotate(270 50 50)" /><line x1="88" y1="50" x2="96" y2="50" stroke-width="0.85" transform="rotate(280 50 50)" /><line x1="91" y1="50" x2="96" y2="50" stroke-width="0.45" transform="rotate(290 50 50)" /><line x1="91" y1="50" x2="96" y2="50" stroke-width="0.45" transform="rotate(300 50 50)" /><line x1="91" y1="50" x2="96" y2="50" stroke-width="0.45" transform="rotate(310 50 50)" /><line x1="88" y1="50" x2="96" y2="50" stroke-width="0.85" transform="rotate(320 50 50)" /><line x1="91" y1="50" x2="96" y2="50" stroke-width="0.45" transform="rotate(330 50 50)" /><line x1="91" y1="50" x2="96" y2="50" stroke-width="0.45" transform="rotate(340 50 50)" /><line x1="91" y1="50" x2="96" y2="50" stroke-width="0.45" transform="rotate(350 50 50)" />
+                    </g></svg>
+                    <div class="runway-axis rotate-[310deg]"></div>
+                    <svg id="wind-arrow-31R" class="wind-arrow" viewBox="0 0 100 100"><polygon points="50,96 45.5,86 54.5,86" fill="#fff59d" /></svg>
+                    <div class="wind-readout"><span id="wind-dir-31R">---</span><span class="wind-unit"><span id="wind-spd-31R">--</span></span></div>
+                    <div class="wind-dot"></div>
+                </div>
+                <div id="rwy-31R" class="runway-box bg-gray-600 px-3 py-4 text-3xl font-bold cursor-pointer transition">31R</div>
+            </div>
+
+            <!-- RIGHT SIDE / 13L -->
+            <div class="runway-row right">
+                <div id="rwy-13L" class="runway-box bg-gray-600 px-3 py-4 text-3xl font-bold cursor-pointer transition">13L</div>
+                <div class="wind-rose" data-runway="13L" aria-label="Wind for runway 13L">
+                    <svg class="ticks" viewBox="0 0 100 100"><g stroke="currentColor" class="text-atc-border/60">
+                        <line x1="88" y1="50" x2="96" y2="50" stroke-width="0.85" transform="rotate(0 50 50)" /><line x1="91" y1="50" x2="96" y2="50" stroke-width="0.45" transform="rotate(10 50 50)" /><line x1="91" y1="50" x2="96" y2="50" stroke-width="0.45" transform="rotate(20 50 50)" /><line x1="91" y1="50" x2="96" y2="50" stroke-width="0.45" transform="rotate(30 50 50)" /><line x1="88" y1="50" x2="96" y2="50" stroke-width="0.85" transform="rotate(40 50 50)" /><line x1="91" y1="50" x2="96" y2="50" stroke-width="0.45" transform="rotate(50 50 50)" /><line x1="91" y1="50" x2="96" y2="50" stroke-width="0.45" transform="rotate(60 50 50)" /><line x1="91" y1="50" x2="96" y2="50" stroke-width="0.45" transform="rotate(70 50 50)" /><line x1="88" y1="50" x2="96" y2="50" stroke-width="0.85" transform="rotate(80 50 50)" /><line x1="91" y1="50" x2="96" y2="50" stroke-width="0.45" transform="rotate(90 50 50)" /><line x1="91" y1="50" x2="96" y2="50" stroke-width="0.45" transform="rotate(100 50 50)" /><line x1="91" y1="50" x2="96" y2="50" stroke-width="0.45" transform="rotate(110 50 50)" /><line x1="88" y1="50" x2="96" y2="50" stroke-width="0.85" transform="rotate(120 50 50)" /><line x1="91" y1="50" x2="96" y2="50" stroke-width="0.45" transform="rotate(130 50 50)" /><line x1="91" y1="50" x2="96" y2="50" stroke-width="0.45" transform="rotate(140 50 50)" /><line x1="91" y1="50" x2="96" y2="50" stroke-width="0.45" transform="rotate(150 50 50)" /><line x1="88" y1="50" x2="96" y2="50" stroke-width="0.85" transform="rotate(160 50 50)" /><line x1="91" y1="50" x2="96" y2="50" stroke-width="0.45" transform="rotate(170 50 50)" /><line x1="91" y1="50" x2="96" y2="50" stroke-width="0.45" transform="rotate(180 50 50)" /><line x1="91" y1="50" x2="96" y2="50" stroke-width="0.45" transform="rotate(190 50 50)" /><line x1="88" y1="50" x2="96" y2="50" stroke-width="0.85" transform="rotate(200 50 50)" /><line x1="91" y1="50" x2="96" y2="50" stroke-width="0.45" transform="rotate(210 50 50)" /><line x1="91" y1="50" x2="96" y2="50" stroke-width="0.45" transform="rotate(220 50 50)" /><line x1="91" y1="50" x2="96" y2="50" stroke-width="0.45" transform="rotate(230 50 50)" /><line x1="88" y1="50" x2="96" y2="50" stroke-width="0.85" transform="rotate(240 50 50)" /><line x1="91" y1="50" x2="96" y2="50" stroke-width="0.45" transform="rotate(250 50 50)" /><line x1="91" y1="50" x2="96" y2="50" stroke-width="0.45" transform="rotate(260 50 50)" /><line x1="91" y1="50" x2="96" y2="50" stroke-width="0.45" transform="rotate(270 50 50)" /><line x1="88" y1="50" x2="96" y2="50" stroke-width="0.85" transform="rotate(280 50 50)" /><line x1="91" y1="50" x2="96" y2="50" stroke-width="0.45" transform="rotate(290 50 50)" /><line x1="91" y1="50" x2="96" y2="50" stroke-width="0.45" transform="rotate(300 50 50)" /><line x1="91" y1="50" x2="96" y2="50" stroke-width="0.45" transform="rotate(310 50 50)" /><line x1="88" y1="50" x2="96" y2="50" stroke-width="0.85" transform="rotate(320 50 50)" /><line x1="91" y1="50" x2="96" y2="50" stroke-width="0.45" transform="rotate(330 50 50)" /><line x1="91" y1="50" x2="96" y2="50" stroke-width="0.45" transform="rotate(340 50 50)" /><line x1="91" y1="50" x2="96" y2="50" stroke-width="0.45" transform="rotate(350 50 50)" />
+                    </g></svg>
+                    <div class="runway-axis rotate-[130deg]"></div>
+                    <svg id="wind-arrow-13L" class="wind-arrow" viewBox="0 0 100 100"><polygon points="50,96 45.5,86 54.5,86" fill="#fff59d" /></svg>
+                    <div class="wind-readout"><span id="wind-dir-13L">---</span><span class="wind-unit"><span id="wind-spd-13L">--</span></span></div>
+                    <div class="wind-dot"></div>
                 </div>
             </div>
 
         </div>
+    </main>
 
-        
-        <!-- BOTTOM INFO PANEL -->
-        <div class="bg-[#1a1c1e] border-t border-atc-border shadow-2xl shrink-0">
-            <!-- Felső sáv a METAR és TAF számára -->
-            <div class="px-6 py-2 bg-black/30 border-b border-atc-border/30">
-                <div id="taf" class="text-atc-blue-dim text-[10px] font-mono truncate leading-tight">Loading TAF...</div>
-            </div>
-            
-            <!-- ATIS BOX - Ez fedi le az alját -->
-            <div class="px-6 py-4 min-h-[80px] flex items-center">
-                <div id="atis" class="text-atis-text text-lg tracking-wider w-full">
-                    <span class="animate-pulse text-atc-text-dim italic">Waiting for ATIS data...</span>
-                </div>
+    <!-- ATIS: unchanged -->
+    <div class="bg-[#1a1c1e] border-t border-atc-border shadow-2xl shrink-0">
+        <div class="px-6 py-4 min-h-[80px] flex items-center">
+            <div id="atis" class="text-atis-text text-lg tracking-wider w-full">
+                <span class="animate-pulse text-atc-text-dim italic">Waiting for ATIS data...</span>
             </div>
         </div>
+    </div>
 
-        <script type="module" src="dist/main.js?v=1.0"></script>
-    </body>
+    <script>
+        function updateUtcClock() {
+            const now = new Date();
+            const hh = String(now.getUTCHours()).padStart(2, "0");
+            const mm = String(now.getUTCMinutes()).padStart(2, "0");
+            const ss = String(now.getUTCSeconds()).padStart(2, "0");
+
+            const h = document.getElementById("utc-hour");
+            const m = document.getElementById("utc-minute");
+            const sec = document.getElementById("utc-second");
+            if (h) h.textContent = hh;
+            if (m) m.textContent = mm;
+            if (sec) sec.textContent = ss;
+        }
+
+
+        function renderDegreeLabels() {
+            const labels = [0, 30, 60, 90, 120, 150, 180, 210, 240, 270, 300, 330];
+            document.querySelectorAll('.wind-rose').forEach(rose => {
+                labels.forEach(deg => {
+                    const label = document.createElement('span');
+                    label.className = 'degree-label';
+                    label.textContent = String(deg).padStart(3, '0');
+                    const rad = (deg - 90) * Math.PI / 180;
+                    const radius = 56;
+                    const x = 50 + Math.cos(rad) * radius;
+                    const y = 50 + Math.sin(rad) * radius;
+                    label.style.left = `${x}%`;
+                    label.style.top = `${y}%`;
+                    label.style.transform = 'translate(-50%, -50%)';
+                    rose.appendChild(label);
+                });
+            });
+        }
+
+        updateUtcClock();
+        renderDegreeLabels();
+        setInterval(updateUtcClock, 1000);
+    </script>
+
+    <script type="module" src="dist/main.js?v=1.1"></script>
+</body>
 </html>

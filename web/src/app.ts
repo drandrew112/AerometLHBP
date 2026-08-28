@@ -1,6 +1,6 @@
 // @ts-ignore
 const socket = io({
-    transports: ['websocket'], // Kényszerítsük a tiszta WebSocketet
+    transports: ['websocket'],
     upgrade: false
 });
 
@@ -25,8 +25,6 @@ socket.on('disconnect', () => {
     }
 });
 
-
-
 import { MetarData, TafData, AtisData } from "./defs.js";
 
 let cache_metar: MetarData;
@@ -34,37 +32,38 @@ let cache_metar: MetarData;
 function auto_rwy_selection() {
     const d: MetarData = cache_metar;
     if (!d) return;
+
     if (d.wspd > 4) {
         if (d.wdir == "VRB") {
-            setRwyActive("31L", true)
-            setRwyActive("31R", true)
-            setRwyActive("13R", false)
-            setRwyActive("13L", false)
+            setRwyActive("31L", true);
+            setRwyActive("31R", true);
+            setRwyActive("13R", false);
+            setRwyActive("13L", false);
         } else {
             if (d.wdir >= 220 || d.wdir <= 40) {
-                setRwyActive("31L", true)
-                setRwyActive("31R", true)
-                setRwyActive("13R", false)
-                setRwyActive("13L", false)
+                setRwyActive("31L", true);
+                setRwyActive("31R", true);
+                setRwyActive("13R", false);
+                setRwyActive("13L", false);
             } else if (d.wdir < 220 || d.wdir > 40) {
-                setRwyActive("31L", false)
-                setRwyActive("31R", false)
-                setRwyActive("13R", true)
-                setRwyActive("13L", true)
+                setRwyActive("31L", false);
+                setRwyActive("31R", false);
+                setRwyActive("13R", true);
+                setRwyActive("13L", true);
             }
         }
     } else {
-        setRwyActive("31L", true)
-        setRwyActive("31R", true)
-        setRwyActive("13R", false)
-        setRwyActive("13L", false)
+        setRwyActive("31L", true);
+        setRwyActive("31R", true);
+        setRwyActive("13R", false);
+        setRwyActive("13L", false);
     }
 }
-
 
 function setRwyActive(rwy: string, state: boolean): void {
     const el = document.getElementById("rwy-" + rwy);
     if (!el) return;
+
     if (state) {
         el.classList.remove("bg-gray-600");
         el.classList.add("bg-green-600", "text-white");
@@ -73,6 +72,7 @@ function setRwyActive(rwy: string, state: boolean): void {
         el.classList.add("bg-gray-600");
     }
 }
+
 // Kattintás támogatás
 document.querySelectorAll(".runway-box").forEach(el => {
     el.addEventListener("click", () => {
@@ -90,13 +90,14 @@ function updateAtisUI(atisData: AtisData | null) {
         // RWY Check
         const atis_arr_rwy_dir = atisData.arrRunway[0]?.slice(0, 2);
         const atis_dep_rwy_dir = atisData.depRunways[0]?.slice(0, 2);
+
         let dep_color = "text-atis-green";
         let arr_color = "text-atis-green";
+
         if (cache_metar.wdir == "VRB") {
             // RWY DIR (prefered) 31
         } else {
             if (cache_metar.wdir >= 220 || cache_metar.wdir <= 40) {
-                // RWY DIR 31
                 if (atis_arr_rwy_dir && atis_arr_rwy_dir !== "31") {
                     arr_color = "text-atis-yellow";
                 }
@@ -104,7 +105,6 @@ function updateAtisUI(atisData: AtisData | null) {
                     dep_color = "text-atis-yellow";
                 }
             } else if (cache_metar.wdir < 220 || cache_metar.wdir > 40) {
-                // RWY DIR 13
                 if (atis_arr_rwy_dir && atis_arr_rwy_dir !== "13") {
                     arr_color = "text-atis-yellow";
                 }
@@ -117,6 +117,7 @@ function updateAtisUI(atisData: AtisData | null) {
         // TFL Check
         const tfl = parseInt(atisData.transLvl);
         let correct_tfl = 110;
+
         if (cache_metar.altim >= "1013") {
             correct_tfl = 110;
         } else if (cache_metar.altim < "1013") {
@@ -124,6 +125,7 @@ function updateAtisUI(atisData: AtisData | null) {
         } else if (cache_metar.altim < "997") {
             correct_tfl = 130;
         }
+
         let tfl_color = "text-atis-green";
         if (tfl != correct_tfl) {
             tfl_color = "text-atis-red";
@@ -131,8 +133,10 @@ function updateAtisUI(atisData: AtisData | null) {
 
         // Megjelenítés és tartalom frissítése
         let atisTemplate = "ATIS [ATIS_LETTER], TIME [ATIS_TIME], ARR [ARR], DEP [DEP], TL [TL], [METAR]";
+
         if (config?.server.networkProvider == "IVAO") {
-            atisTemplate = config?.ivao.atisText || "ATIS [ATIS_LETTER], TIME [ATIS_TIME], ARR [ARR], DEP [DEP], TL [TL], [METAR]";
+            atisTemplate = config?.ivao.atisText ||
+                "ATIS [ATIS_LETTER], TIME [ATIS_TIME], ARR [ARR], DEP [DEP], TL [TL], [METAR]";
         }
 
         const atisLetterHTML = `<a class='text-atis-green'>${atisData.infoLetter}</a>`;
@@ -145,7 +149,7 @@ function updateAtisUI(atisData: AtisData | null) {
             tflHTML += `<a class='text-atis-red'> (${correct_tfl})</a>`;
         }
 
-        let finalAtis = atisTemplate
+        const finalAtis = atisTemplate
             .replace(/\[ATIS_LETTER\]/g, atisLetterHTML)
             .replace(/\[ATIS_TIME\]/g, atisTimeHTML || "n/a")
             .replace(/\[ARR\]/g, arrHTML)
@@ -156,83 +160,72 @@ function updateAtisUI(atisData: AtisData | null) {
 
         out_atis.style.display = "block";
         out_atis.innerHTML = finalAtis;
-        
+
         // Pályák aktiválása az ATIS alapján
-        // Először minden pályát lekapcsolunk
         ["31L", "31R", "13L", "13R"].forEach(r => setRwyActive(r, false));
-        
-        // Bekapcsoljuk azokat, amik az ATIS-ban szerepelnek (Induló + Érkező)
+
         const allActiveRunways = [...atisData.depRunways, ...atisData.arrRunway];
         allActiveRunways.forEach(rwy => {
             if (rwy) setRwyActive(rwy, true);
         });
-
     } else {
-        // Ha nincs adat, elrejtjük a panelt
         out_atis.style.display = "block";
         out_atis.innerHTML = "<a class='text-atis-red'>ATIS data not available!</a>";
-        auto_rwy_selection(); 
+        auto_rwy_selection();
     }
 }
 
-async function load_data(data: MetarData, taf_data: TafData | undefined, atis_data: AtisData | null) {
+function updateWindRoses(data: MetarData): void {
+    const runways = ["31L", "31R", "13L", "13R"];
+
+    runways.forEach(rwy => {
+        const out_dir = document.getElementById(`wind-dir-${rwy}`);
+        const out_spd = document.getElementById(`wind-spd-${rwy}`);
+        const arrow = document.getElementById(`wind-arrow-${rwy}`);
+
+        if (out_dir) out_dir.textContent = data.wdir?.toString() ?? "---";
+        if (out_spd) out_spd.textContent = data.wspd?.toString() ?? "--";
+
+        if (!arrow) return;
+
+        if (data.wdir === "VRB") {
+            arrow.style.display = "none";
+            arrow.style.transform = "rotate(310deg)";
+        } else {
+            const direction = Number(data.wdir);
+
+            if (!Number.isFinite(direction)) {
+                arrow.style.display = "none";
+                return;
+            }
+
+            arrow.style.display = "block";
+
+            // A nyíl a szél haladási irányát mutatja:
+            // METAR 000° -> dél felé mutató nyíl.
+            const displayDirection = (direction + 180) % 360;
+            arrow.style.transform = `rotate(${displayDirection}deg)`;
+        }
+    });
+}
+
+async function load_data(
+    data: MetarData,
+    taf_data: TafData | undefined,
+    atis_data: AtisData | null
+) {
     const out_qnh = document.getElementById("QNH");
-    const wind_div = document.getElementById("wind_div");
-    const out_wdir = document.getElementById("wind_dir");
-    const out_wspd = document.getElementById("wind_spd");
     const out_conditions = document.getElementById("conditions");
 
-    //const out_metar = document.getElementById("metar");
-    const out_taf = document.getElementById("taf");
-
-    const windArrow = document.getElementById("wind-arrow");
-    const arrowHead = document.getElementById("arrow-head");
-
-    if (!out_qnh || !wind_div || !out_wdir || !out_wspd || !out_conditions || !out_taf || !windArrow || !arrowHead) return;
+    if (!out_qnh || !out_conditions) return;
 
     if (data && taf_data) {
-        // Update data
-        //out_metar.innerHTML = data.rawOb || "METAR N/A";
-        out_taf.innerHTML = taf_data.rawTAF || "TAF N/A";
-
         out_qnh.innerHTML = data.altim;
-        out_wdir.innerHTML = data.wdir.toString();
-        out_wspd.innerHTML = data.wspd.toString();
         out_conditions.innerHTML = data.cover;
 
-        // Wind background color
-        if (data.wspd >= 4) {
-            wind_div.classList.remove("bg-green-600");
-            wind_div.classList.add("bg-yellow-600");
-            wind_div.classList.remove("bg-red-600");
-        } else if (data.wspd <= 4) {
-            wind_div.classList.add("bg-green-600");
-            wind_div.classList.remove("bg-yellow-600");
-            wind_div.classList.remove("bg-red-600");
-        } else if (data.wspd >= 15) {
-            wind_div.classList.remove("bg-green-600");
-            wind_div.classList.remove("bg-yellow-600");
-            wind_div.classList.add("bg-red-600");
-        }
-
-        // Wind arrow rotation
-        if (windArrow) {
-            if (data.wdir === "VRB") {
-                windArrow.style.display = "none"; // VRB esetén elhalványul
-                windArrow.style.transform = `rotate(310deg)`;
-            } else {
-                const direction = Number(data.wdir);
-                windArrow.style.display = "block";
-                
-                // +180 fok, hogy a szélirány átellenes oldalán jelenjen meg
-                const displayDirection = (direction + 180) % 360;
-                windArrow.style.transform = `rotate(${displayDirection}deg)`;
-            }
-        }
-
         cache_metar = data;
-        //auto_rwy_selection();
 
+        updateWindRoses(data);
         updateAtisUI(atis_data);
     }
 }
@@ -240,11 +233,13 @@ async function load_data(data: MetarData, taf_data: TafData | undefined, atis_da
 socket.on('weather_update', (data: any) => {
     if (!data || !data.metar || !data.taf) {
         console.log("DATA NOT AVAILABLE");
+
         const out_atis = document.getElementById("atis");
         if (out_atis) {
             out_atis.style.display = "block";
             out_atis.innerHTML = "<a class='text-atis-red'>DATA NOT AVAILABLE!</a>";
         }
+
         return;
     }
 
