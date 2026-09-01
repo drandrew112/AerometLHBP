@@ -82,9 +82,18 @@ document.querySelectorAll(".runway-box").forEach(el => {
     });
 });
 
+function updateAtisLetterTop(letter: string | null | undefined): void {
+    const el = document.getElementById("atis-letter-top");
+    if (!el) return;
+    const clean = (letter ?? "").trim().toUpperCase();
+    el.textContent = clean || "-";
+}
+
 function updateAtisUI(atisData: AtisData | null) {
     const out_atis = document.getElementById("atis");
     if (!out_atis) return;
+
+    updateAtisLetterTop(atisData?.infoLetter);
 
     if (atisData) {
         // RWY Check

@@ -19,12 +19,16 @@ export class VatsimConnector implements Defs.NetworkProvider {
         this.apiUrl = _apiUrl;
     }
 
-    parseVatsimAtis(rawAtis: string): Defs.AtisData {
+    parseVatsimAtis(rawAtis: string, headerLetter?: string): Defs.AtisData {
         // Example: BUDAPEST INFORMATION H . TIME 1800. RUNWAY DIRECTION 31 . EXPECT ILS APPROACH RUNWAY 31R. DEPARTURE RUNWAY 31R. TRANSITION LEVEL 110 . WIND 300 DEGREES 6 KNOTS. CAVOK . TEMPERATURE 15 . DEWPOINT 6 . QNH 1014 HECTOPASCALS. NO SIGNIFICANT CHANGES ARE FORECAST. ATTENTION RUNWAY 31L CLOSED DUE MAINTENANCE. REQUEST ATC CLEARANCE ON DELIVERY. FOR STARTUP CONTACT GROUND ONLY WHEN INSTRUCTED. ACKNOWLEDGE INFORMATION H .
         const parts = rawAtis.split('.').map(part => part.trim());
-        
+
+        // The VATSIM data feed exposes the current ATIS letter in the entry header
+        // (atis_code). Prefer it, and fall back to parsing it from the text body.
+        const normalizedHeaderLetter = (headerLetter || "").trim().toUpperCase();
+
         let atisData: Defs.AtisData = {
-            infoLetter: "",
+            infoLetter: /^[A-Z]$/.test(normalizedHeaderLetter) ? normalizedHeaderLetter : "",
             atisTime: "",
             icao: config.server.airport, // Get from config
             arrRunway: [],
@@ -37,7 +41,7 @@ export class VatsimConnector implements Defs.NetworkProvider {
         // FIX: Changed 'foreach' to standard TypeScript 'for' loop
         for (const part of parts) {
             // 1. Parse Information Letter
-            if (part.startsWith("BUDAPEST INFORMATION")) {
+            if (!atisData.infoLetter && part.startsWith("BUDAPEST INFORMATION")) {
                 const match = part.match(/BUDAPEST INFORMATION ([A-Z])/);
                 if (match) atisData.infoLetter = match[1];
             }
@@ -76,7 +80,7 @@ export class VatsimConnector implements Defs.NetworkProvider {
         const data: Defs.VatsimAtisResponse = await response.json();
         const atisEntry = data.atis.find((entry: any) => entry.station === this.config.stationId);
         if (atisEntry) {
-            const parsedATIS = this.parseVatsimAtis(atisEntry.text_atis.join(" "));
+            const parsedATIS = this.parseVatsimAtis(atisEntry.text_atis.join(" "), atisEntry.atis_code);
             return parsedATIS;
         }
         return false;
